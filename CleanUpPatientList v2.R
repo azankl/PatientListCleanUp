@@ -7,6 +7,7 @@ library(here)
 
 #read Patient List
 PatientList <- read_excel(here("PatientList_updatedAZ.xlsx"))
+#NOTE: importing DOB does not work correctly as our DOB column in Excel has incomplete and missing dates
 
 #remove blank rows 
 PatientList <- filter_all(PatientList, any_vars(. != 0))
@@ -48,26 +49,28 @@ MissingDataList <- CombinedList %>% filter(is.na(FamilyName)) %>% select(Dataset
 WrongSexList <- CombinedList %>% filter(Gender != Sex) %>% select(FamilyName, FirstName, Gender, Sex)
 # initially 2 sex mismatches in PatientList, now corrected, Gender in SampleList is correct
 
-#Count samples in each batch
-CombinedList %>% count(Manifest)
-
 #add sample FR07887668 orginally sequenced by GenomeOne
 CombinedList <- add_row(CombinedList,
-                            FamilyName = 'RITCHIE',
-                            FirstName = 'Harrison',
-                            DOB = '7/5/2013',
-                            SampleID = 'FR07887668',
-                            Manifest = '16F00039',
-                            Gender = 'M',
-                            Affected = "yes",
-                            RID = '42-1',
-                            FatherRID = '42-2',
-                            MotherRID = '42-3')
+                        FamilyName = 'RITCHIE',
+                        FirstName = 'Harrison',
+                        SampleID = 'FR07887668',
+                        Manifest = '16F00039',
+                        Gender = 'M',
+                        Affected = "yes",
+                        RID = '42-1',
+                        FatherRID = '42-2',
+                        MotherRID = '42-3')
+
+#Count samples in each batch
+CombinedList %>% count(Manifest)
 
 # remove identifiers and reorder columns
 CombinedListAnon <- CombinedList %>% select(SampleID, Manifest, Gender, Affected, RID, FatherRID, MotherRID)
 
-#write to disk
+#write sample list for Alex Drew to disk
 readr::write_csv(CombinedListAnon, here("SampleInfo_updated.csv"))
 
-
+#make another sample list 
+MasterList <- CombinedList %>% select(SampleID, FamilyName, FirstName, Gender, Affected, RID, FatherRID, MotherRID)
+FamilyID_pattern <- "[1-9]*"
+MasterList <- add_column(MasterList, FamilyID = str_match(MasterList$RID, FamilyID_pattern)[,1], .before = 'RID')
