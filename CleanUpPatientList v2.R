@@ -72,5 +72,7 @@ readr::write_csv(CombinedListAnon, here("SampleInfo_updated.csv"))
 
 #make another sample list 
 MasterList <- CombinedList %>% select(SampleID, FamilyName, FirstName, Gender, Affected, RID, FatherRID, MotherRID)
-FamilyID_pattern <- "[1-9]*"
+FamilyID_pattern <- "[0-9]*"
 MasterList <- add_column(MasterList, FamilyID = str_match(MasterList$RID, FamilyID_pattern)[,1], .before = 'RID')
+
+#make list for Scott
