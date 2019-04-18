@@ -51,18 +51,23 @@ WrongSexList <- CombinedList %>% filter(Gender != Sex) %>% select(FamilyName, Fi
 #Count samples in each batch
 CombinedList %>% count(Manifest)
 
+#add sample FR07887668 orginally sequenced by GenomeOne
+CombinedList <- add_row(CombinedList,
+                            FamilyName = 'RITCHIE',
+                            FirstName = 'Harrison',
+                            DOB = '7/5/2013',
+                            SampleID = 'FR07887668',
+                            Manifest = '16F00039',
+                            Gender = 'M',
+                            Affected = "yes",
+                            RID = '42-1',
+                            FatherRID = '42-2',
+                            MotherRID = '42-3')
+
 # remove identifiers and reorder columns
 CombinedListAnon <- CombinedList %>% select(SampleID, Manifest, Gender, Affected, RID, FatherRID, MotherRID)
 
-#add sample FR07887668 orginally sequenced by GenomeOne
-CombinedListAnon <- add_row(CombinedListAnon,
-        SampleID = 'FR07887668',
-        Manifest = '16F00039',
-        Gender = 'M',
-        Affected = "yes",
-        RID = '42-1',
-        FatherRID = '42-2',
-        MotherRID = '42-3')
-
 #write to disk
-readr::write_csv(CombinedListAnon, here("SampleInfo.csv"))
+readr::write_csv(CombinedListAnon, here("SampleInfo_updated.csv"))
+
+
