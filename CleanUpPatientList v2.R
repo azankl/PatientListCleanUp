@@ -64,6 +64,9 @@ CombinedList <- add_row(CombinedList,
 #Count samples in each batch
 CombinedList %>% count(Manifest)
 
+#make Gender a Factor
+CombinedList$Gender <- as.factor(CombinedList$Gender)
+
 # remove identifiers and reorder columns
 CombinedListAnon <- CombinedList %>% select(SampleID, Manifest, Gender, Affected, RID, FatherRID, MotherRID)
 
@@ -73,6 +76,15 @@ readr::write_csv(CombinedListAnon, here("SampleInfo_updated.csv"))
 #make another sample list 
 MasterList <- CombinedList %>% select(SampleID, FamilyName, FirstName, Gender, Affected, RID, FatherRID, MotherRID)
 FamilyID_pattern <- "[0-9]*"
-MasterList <- add_column(MasterList, FamilyID = str_match(MasterList$RID, FamilyID_pattern)[,1], .before = 'RID')
+MasterList <- add_column(MasterList, FamilyID = as.numeric(str_match(MasterList$RID, FamilyID_pattern)[,1]), .before = 'RID')
 
 #make list for Scott
+OI_like <- c(30,59,20,51,15,41,16,7,11,3)
+abnormal_mineralisation <- c(2,25)
+OIlike_List <- MasterList %>% select(SampleID, Gender, Affected, FamilyID, RID, FatherRID, MotherRID) %>% filter(FamilyID %in% OI_like)
+abnormalMineralisation_List <- MasterList %>% select(SampleID, Gender, Affected, FamilyID, RID, FatherRID, MotherRID) %>% filter(FamilyID %in% abnormal_mineralisation)
+readr::write_csv(OIlike_List, here("OILikeList.csv"))
+readr::write_csv(abnormalMineralisation_List, here("abnormalMineralisation_List.csv"))
+
+
+
