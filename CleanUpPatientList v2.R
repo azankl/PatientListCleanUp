@@ -49,17 +49,9 @@ MissingDataList <- CombinedList %>% filter(is.na(FamilyName)) %>% select(Dataset
 WrongSexList <- CombinedList %>% filter(Gender != Sex) %>% select(FamilyName, FirstName, Gender, Sex)
 # initially 2 sex mismatches in PatientList, now corrected, Gender in SampleList is correct
 
-#add sample FR07887668 orginally sequenced by GenomeOne
-CombinedList <- add_row(CombinedList,
-                        FamilyName = 'RITCHIE',
-                        FirstName = 'Harrison',
-                        SampleID = 'FR07887668',
-                        Manifest = '16F00039',
-                        Gender = 'M',
-                        Affected = "yes",
-                        RID = '42-1',
-                        FatherRID = '42-2',
-                        MotherRID = '42-3')
+#add sample FR07887668 for RID 42-1 orginally sequenced by GenomeOne
+addPatient<-read_csv(here("sample_FR07887668.csv"))
+CombinedList <- bind_rows(CombinedList, addPatient) #throws warning about coercing factor into char, ok to ignore
 
 #Count samples in each batch
 CombinedList %>% count(Manifest)
