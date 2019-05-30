@@ -49,34 +49,44 @@ MissingDataList <- CombinedList %>% filter(is.na(FamilyName)) %>% select(Dataset
 WrongSexList <- CombinedList %>% filter(Gender != Sex) %>% select(FamilyName, FirstName, Gender, Sex)
 # initially 2 sex mismatches in PatientList, now corrected, Gender in SampleList is correct
 
-#add sample FR07887668 for RID 42-1 orginally sequenced by GenomeOne
+#add sample FR07887668 (RID 42-1) orginally sequenced by GenomeOne
 addPatient<-read_csv(here("sample_FR07887668.csv"))
-CombinedList <- bind_rows(CombinedList, addPatient) #throws warning about coercing factor into char, ok to ignore
+CombinedList <- bind_rows(CombinedList, addPatient)
+#NOTE: throws warning about coercing factor into char, thats OK
 
 #Count samples in each batch
 CombinedList %>% count(Manifest)
 
-#make Gender a Factor
+#make Gender and Affected a Factor
 CombinedList$Gender <- as.factor(CombinedList$Gender)
+CombinedList$Affected <- as.factor(CombinedList$Affected)
+
+#add a Family_ID column
+FamilyID_pattern <- "[0-9]*"
+CombinedList <- add_column(CombinedList, FamilyID = as.numeric(str_match(CombinedList$RID, FamilyID_pattern)[,1]), .before = 'RID')
+
+#add Relationship column (does not work)
+#CombinedList <- CombinedList %>% filter(!is.na(FatherRID)) %>% mutate (Relation = "father")
 
 # remove identifiers and reorder columns
 CombinedListAnon <- CombinedList %>% select(SampleID, Manifest, Gender, Affected, RID, FatherRID, MotherRID)
 
 #write sample list for Alex Drew to disk
-readr::write_csv(CombinedListAnon, here("SampleInfo_updated.csv"))
+write_csv(CombinedListAnon, here("SampleInfo_updated.csv"))
 
-#make another sample list 
+#make another sample list with a Family_ID column
 MasterList <- CombinedList %>% select(SampleID, FamilyName, FirstName, Gender, Affected, RID, FatherRID, MotherRID)
-FamilyID_pattern <- "[0-9]*"
-MasterList <- add_column(MasterList, FamilyID = as.numeric(str_match(MasterList$RID, FamilyID_pattern)[,1]), .before = 'RID')
 
 #make list for Scott
 OI_like <- c(30,59,20,51,15,41,16,7,11,3)
 abnormal_mineralisation <- c(2,25)
 OIlike_List <- MasterList %>% select(SampleID, Gender, Affected, FamilyID, RID, FatherRID, MotherRID) %>% filter(FamilyID %in% OI_like)
 abnormalMineralisation_List <- MasterList %>% select(SampleID, Gender, Affected, FamilyID, RID, FatherRID, MotherRID) %>% filter(FamilyID %in% abnormal_mineralisation)
-readr::write_csv(OIlike_List, here("OILikeList.csv"))
-readr::write_csv(abnormalMineralisation_List, here("abnormalMineralisation_List.csv"))
+write_csv(OIlike_List, here("OILikeList.csv"))
+write_csv(abnormalMineralisation_List, here("abnormalMineralisation_List.csv"))
 
+#make list for Notion Family Page
+NotionList <- MasterList %>% select(FamilyID, SampleID)
+write_csv(NotionList, here("NotionList.csv"))
 
 
