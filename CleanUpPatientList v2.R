@@ -89,4 +89,6 @@ write_csv(abnormalMineralisation_List, here("abnormalMineralisation_List.csv"))
 NotionList <- MasterList %>% select(FamilyID, SampleID)
 write_csv(NotionList, here("NotionList.csv"))
 
-
+#make list for Catherine Vacher
+List_for_Catherine <- PatientList %>% select(RID, DOB, Sex, Affected )
+write_csv(List_for_Catherine, here("List_for_Catherine.csv"))
